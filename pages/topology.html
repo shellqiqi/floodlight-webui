@@ -47,7 +47,7 @@
             background-color: #f8f8f8;
         }
         /*#page-wrapper {*/
-            /*flex: 1;*/
+        /*flex: 1;*/
         /*}*/
         body, html, #wrapper {
             height: auto;
@@ -57,11 +57,11 @@
             height: auto;
         }
         /*body, #page-wrapper {*/
-            /*display: flex;*/
+        /*display: flex;*/
         /*}*/
         /*.row {*/
-            /*display: flex;*/
-            /*flex: 1;*/
+        /*display: flex;*/
+        /*flex: 1;*/
         /*}*/
     </style>
 </head>
@@ -95,11 +95,11 @@
     </nav>
 
     <div id="page-wrapper">
-         <!--/.row-->
+        <!--/.row-->
         <!--<div class="row">-->
-            <div id="mynetwork"></div>
+        <div id="mynetwork"></div>
         <!--</div>-->
-         <!--/.row-->
+        <!--/.row-->
     </div>
     <!-- /#page-wrapper -->
     <div id="login-modal-include"></div>
@@ -192,6 +192,39 @@
     }
 
     loadSwitches();
+    setInterval(draw, 1000 * 10);
+    setInterval(getDDOS, 1000 * 10);
+
+    function getDDOS() {
+        var url = "http://192.168.28.101:8888/";
+
+        $.ajax({
+            url: url,
+            success: function (data) {
+                var obj = JSON.parse(data);
+                var status = obj.status;
+                if (status !== 'success') return;
+                var result = obj.result;
+                for (var i = 0; i < nodes.length; i++) {
+                    var id = nodes[i].id;
+                    if (result[id] === undefined) {
+                        // pass
+                    } else if (result[id] === 0) {
+                        nodes[i].image = DIR + 'switch.png';
+                    } else if (result[id] === 1 || result[id] === 2) {
+                        nodes[i].image = DIR + 'switch-red.png';
+                    } else {
+                        nodes[i].image = DIR + 'switch.png';
+                    }
+                }
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                console.log(jqXHR.responseText);
+                alert('Error: ' + " " + jqXHR.responseText + " \n Status: " + textStatus + " \n Error Thrown: " +
+                    errorThrown);
+            }
+        })
+    }
 
 
     function loadExternalLinks(hosts) {
@@ -241,7 +274,7 @@
             error: function (jqXHR, textStatus, errorThrown) {
                 console.log(jqXHR.responseText);
                 alert('Error: ' + " " + jqXHR.responseText + " \n Status: " + textStatus + " \n Error Thrown: " +
-                        errorThrown);
+                    errorThrown);
             }
         });
     }
@@ -263,7 +296,7 @@
             },
             error: function (jqXHR, textStatus, errorThrown) {
                 alert('Error: ' + " " + jqXHR.responseText + " \n Status: " + textStatus + " \n Error Thrown: " +
-                        errorThrown);
+                    errorThrown);
             }
         });
     }
@@ -312,7 +345,7 @@
             },
             error: function (jqXHR, textStatus, errorThrown) {
                 alert('Error: ' + " " + jqXHR.responseText + " \n Status: " + textStatus + " \n Error Thrown: " +
-                        errorThrown);
+                    errorThrown);
             }
         });
     }
@@ -342,7 +375,7 @@
             error: function (jqXHR, textStatus, errorThrown) {
                 console.log(jqXHR.responseText);
                 alert('Error: ' + " " + jqXHR.responseText + " \n Status: " + textStatus + " \n Error Thrown: " +
-                        errorThrown);
+                    errorThrown);
             }
         });
 

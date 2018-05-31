@@ -95,10 +95,31 @@
     </nav>
 
     <div id="page-wrapper">
+        <div class="row" style="padding-top: 12px; padding-bottom: 12px">
+            <div class="col-md-6">
+                <div class="input-group">
+                    <span class="input-group-addon">URL</span>
+                    <input type="text" class="form-control" value="http://localhost:8888/" id="ddos-url">
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="input-group">
+                    <span class="input-group-addon">Interval</span>
+                    <input type="number" class="form-control" value="10" min="1" id="ddos-interval">
+                    <span class="input-group-addon">second</span>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="btn-group">
+                    <button class="btn btn-success" onclick="startDDoS()">Start</button>
+                    <button class="btn btn-danger" onclick="stopDDoS()">Stop</button>
+                </div>
+            </div>
+        </div>
         <!--/.row-->
-        <!--<div class="row">-->
-        <div id="mynetwork"></div>
-        <!--</div>-->
+        <div class="row">
+            <div id="mynetwork"></div>
+        </div>
         <!--/.row-->
     </div>
     <!-- /#page-wrapper -->
@@ -156,6 +177,8 @@
     var edges = [];
     var network = null;
 
+    var hasDrawn = false;
+
     var DIR = '../bower_components/visjs/img/refresh-cl/';
     var EDGE_LENGTH_MAIN = 50;
     var EDGE_LENGTH_SUB = 50;
@@ -179,8 +202,12 @@
             width: '100%'
         };
 
-        network = new vis.Network(container, data, options);
-//        network.fit({scale: 4.0});
+        if (hasDrawn === false) {
+            network = new vis.Network(container, data, options);
+            hasDrawn = true;
+        } else {
+            network.setData(data);
+        }
 
         network.on("showPopup", function (params) {
             if (params.charAt(0) == 's') {
@@ -188,18 +215,32 @@
                 network["body"]["nodes"][params]["options"]["title"] = parseFlows(id);
             }
         });
-
     }
 
+    var ddos_url = $('#ddos-url').val();
+    var ddos_interval = $('#ddos-interval').val();
+    var ddos_timer = setInterval(loadSwitches, 1000 * ddos_interval);
+
     loadSwitches();
-    setInterval(draw, 1000 * 10);
-    setInterval(getDDOS, 1000 * 10);
 
-    function getDDOS() {
-        var url = "http://localhost:8888/";
+    function startDDoS() {
+        ddos_url = $('#ddos-url').val();
+        var interval = $('#ddos-interval').val();
+        if  (interval >= 1) {
+            ddos_interval = interval;
+            clearInterval(ddos_timer);
+            ddos_timer = setInterval(loadSwitches, 1000 * ddos_interval);
+        }
+        loadSwitches();
+    }
 
+    function stopDDoS() {
+        clearInterval(ddos_timer);
+    }
+
+    function getDDoS() {
         $.ajax({
-            url: url,
+            url: ddos_url,
             success: function (data) {
                 var obj = JSON.parse(data);
                 var status = obj.status;
@@ -217,10 +258,10 @@
                         nodes[i].image = DIR + 'switch.png';
                     }
                 }
+                draw();
             },
             error: function (jqXHR, textStatus, errorThrown) {
-                console.log(jqXHR.responseText);
-                alert('Error: ' + " " + jqXHR.responseText + " \n Status: " + textStatus + " \n Error Thrown: " +
+                console.log('Error: ' + " " + jqXHR.responseText + " \n Status: " + textStatus + " \n Error Thrown: " +
                     errorThrown);
             }
         })
@@ -291,7 +332,7 @@
                     });
                 }
 
-                draw();
+                getDDoS();
                 //LoadExternalLinks(hosts);
             },
             error: function (jqXHR, textStatus, errorThrown) {
@@ -326,6 +367,8 @@
 
 
     function loadSwitches() {
+        nodes = [];
+        edges = [];
         $.ajax({
             url: "http://" + ipaddress + ":" + restport + "/wm/core/controller/switches/json",
             success: function (data) {

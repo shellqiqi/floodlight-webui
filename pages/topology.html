@@ -263,6 +263,7 @@
             error: function (jqXHR, textStatus, errorThrown) {
                 console.log('Error: ' + " " + jqXHR.responseText + " \n Status: " + textStatus + " \n Error Thrown: " +
                     errorThrown);
+                draw();
             }
         })
     }
@@ -404,6 +405,9 @@
                     if (hosts[i]["attachmentPoint"].length > 0) {
                         var id = "h" + hosts[i]["mac"];
                         var label = "h" + hosts[i]["ipv4"];
+                        for (var j = 0; j < hosts[i]["ipv6"].length; j++) {
+                            label += "\n" + hosts[i]["ipv6"][j];
+                        }
                         nodes.push({
                             id: id,
                             label: label,
